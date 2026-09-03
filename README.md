@@ -59,11 +59,8 @@ yt-resumo-worker/
 └── SPEC.md
 ```
 
-## Modelos Claude
+## Modelo Claude
 
-| Categoria | Modelo | Use case |
-|-----------|--------|----------|
-| teologia | opus | Estudos bíblicos |
-| estudo | opus | Conteúdo técnico |
-| marketing | sonnet | Conteúdo comercial |
-| outro | haiku | Geral (rápido) |
+**Padrão: Opus 5** — usado em todas as categorias.
+
+O worker roda apenas 2x/dia (00:00 e 12:00), então o custo extra do Opus em comparação com Haiku/Sonnet é aceitável pela qualidade superior dos resumos.

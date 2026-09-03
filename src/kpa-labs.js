@@ -4,21 +4,14 @@
  * Usa o mesmo padrão do douglas-ia: ANTHROPIC_BASE_URL + ANTHROPIC_API_KEY
  * O KPA Labs é um proxy da Anthropic API — só precisa trocar a base URL.
  *
- * Modelo por categoria:
- * - teologia → opus (mais profundidade)
- * - estudo → opus
- * - marketing → sonnet (bom custo-benefício)
- * - outro → haiku (rápido)
+ * Modelo padrão: Opus 5 (mais profundo, melhor qualidade)
+ * O cron roda apenas 2x/dia (00:00 e 12:00), então o custo extra
+ * do Opus é aceitável pela qualidade superior.
  */
 
 import axios from 'axios';
 
-const MODELOS_POR_CATEGORIA = {
-  teologia: 'claude-opus-4',
-  estudo: 'claude-opus-4',
-  marketing: 'claude-sonnet-5',
-  outro: 'claude-haiku-4',
-};
+const MODELO_PADRAO = 'claude-opus-5';
 
 const MAX_RETRIES = 3;
 const BASE_DELAY_MS = 1000;
@@ -77,16 +70,15 @@ export function criarClienteKPA() {
 
   return {
     /**
-     * Gera resumo para uma transcrição
+     * Gera resumo para uma transcrição usando Opus 5
      * @param {Object} params
      * @param {string} params.prompt - Prompt com a transcrição
-     * @param {string} params.categoria - Categoria do vídeo
+     * @param {string} [params.categoria] - Categoria do vídeo (não usado, sempre Opus)
      * @returns {Promise<{texto: string, modelo: string}>}
      */
-    async gerarResumo({ prompt, categoria }) {
-      const modelo = MODELOS_POR_CATEGORIA[categoria] || 'claude-haiku-4';
-      const texto = await chamarKPA(prompt, modelo);
-      return { texto, modelo };
+    async gerarResumo({ prompt }) {
+      const texto = await chamarKPA(prompt, MODELO_PADRAO);
+      return { texto, modelo: MODELO_PADRAO };
     },
   };
 }

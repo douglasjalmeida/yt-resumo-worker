@@ -24,9 +24,8 @@ Douglas tem um pipeline de YouTube onde:
    - Ordena: `created_at ASC` (mais antigos primeiro)
 
 2. **Gera resumo via KPA Labs (Claude)**
-   - Usa Haiku para conteúdo rápido (IA, marketing)
-   - Usa Sonnet para conteúdo complexo (teologia, estudos)
-   - Usa Opus para teologia judaica (mais profundidade)
+   - **Modelo padrão: Opus 5** (todas as categorias)
+   - Roda apenas 2x/dia (00:00 e 12:00), custo extra é aceitável pela qualidade superior
 
 3. **Salva resumo no Supabase**
    - Atualiza campo `resumo` da tabela
