@@ -110,7 +110,7 @@ export async function executarWorker() {
       .from('douglas_conteudo_videos')
       .select('video_id, titulo, categoria, transcricao_texto')
       .eq('status', 'transcrito')
-      .is('resumo', null)
+      .is('resumo_md', null)
       .order('data_adicao_playlist', { ascending: true })
       .limit(10);
 
@@ -150,7 +150,7 @@ export async function executarWorker() {
         const { error: erroUpdate } = await supabase
           .from('douglas_conteudo_videos')
           .update({
-            resumo,
+            resumo_md: resumo,
             status: 'concluido',
             updated_at: new Date().toISOString(),
           })
