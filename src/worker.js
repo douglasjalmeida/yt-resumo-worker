@@ -144,7 +144,10 @@ export async function executarWorker() {
           categoria,
         });
 
-        INFO(`Resumo gerado (${modelo})`);
+        INFO(`Resumo gerado (${modelo}) - ${resumo.length} chars`);
+        if (!resumo || resumo.length === 0) {
+          throw new Error('Resumo veio vazio da KPA Labs');
+        }
 
         // Salvar no banco
         const { error: erroUpdate } = await supabase
