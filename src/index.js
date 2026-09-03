@@ -1,22 +1,44 @@
 /**
- * yt-resumo-worker
- * Worker que resume vídeos do YouTube automaticamente via cron
+ * yt-resumo-worker (ON-DEMAND)
+ * Loop contínuo que checa a cada 60s por vídeos pendentes e processa imediatamente.
  *
- * Run: node src/index.js
+ * Cronograma:
+ * - A cada 60s: checa fila
+ * - Se tiver vídeo com status='transcrito' E resumo_md IS NULL: processa na hora
+ * - Notifica WhatsApp via douglas-ia
  */
 
 import 'dotenv/config';
 import { executarWorker } from './worker.js';
 
-console.log('[yt-resumo-worker] Iniciando...');
+const INTERVALO_CHECAGEM_MS = 60 * 1000; // 60 segundos
 
-// Executa uma vez ao iniciar
-executarWorker()
-  .then(({ processados, erros }) => {
-    console.log(`[yt-resumo-worker] Finalizado: ${processados} processados, ${erros} erros`);
-    process.exit(erros > 0 ? 1 : 0);
-  })
-  .catch((err) => {
-    console.error('[yt-resumo-worker] Erro fatal:', err);
-    process.exit(1);
-  });
+function log(tipo, mensagem) {
+  const agora = new Date().toISOString();
+  console.log(`[${agora}] ${tipo}: ${mensagem}`);
+}
+
+console.log('[yt-resumo-worker] Modo ON-DEMAND iniciado');
+console.log(`[yt-resumo-worker] Checando a cada ${INTERVALO_CHECAGEM_MS / 1000}s`);
+
+// Loop principal
+async function loop() {
+  try {
+    const { processados, erros } = await executarWorker({ silencioso: true });
+
+    if (processados > 0 || erros > 0) {
+      console.log(`[yt-resumo-worker] Ciclo: ${processados} processados, ${erros} erros`);
+    }
+  } catch (err) {
+    console.error('[yt-resumo-worker] Erro no ciclo:', err.message);
+  }
+}
+
+// Primeira execução imediata
+loop();
+
+// Depois, a cada 60s
+setInterval(loop, INTERVALO_CHECAGEM_MS);
+
+// Keep alive
+process.stdin.resume();

@@ -1,9 +1,8 @@
 /**
  * Worker principal
- * Busca vídeos pendentes, gera resumos, salva no banco, notifica Telegram
+ * Busca vídeos pendentes, gera resumos, salva no banco, notifica WhatsApp
  */
 
-import cron from 'node-cron';
 import { criarClienteSupabase } from './supabase.js';
 import { criarClienteKPA } from './kpa-labs.js';
 import { criarNotificador } from './notificador.js';
@@ -94,7 +93,7 @@ Transcrição:
 // WORKER
 // ============================================================
 
-export async function executarWorker() {
+export async function executarWorker({ silencioso = false } = {}) {
   const supabase = criarClienteSupabase();
   const kpa = criarClienteKPA();
   const telegram = criarNotificador();
@@ -102,8 +101,18 @@ export async function executarWorker() {
   let processados = 0;
   let erros = 0;
 
+  const log = silencioso
+    ? () => {} // No-op
+    : (tipo, msg) => {
+        const agora = new Date().toISOString();
+        console.log(`[${agora}] ${tipo}: ${msg}`);
+      };
+  const INFO = (msg) => log('INFO', msg);
+  const WARN = (msg) => log('WARN', msg);
+  const ERROR = (msg) => log('ERROR', msg);
+
   try {
-    INFO('Worker iniciado');
+    if (!silencioso) INFO('Worker iniciado');
 
     // 1. Buscar vídeos pendentes
     const { data: videos, error: erroBusca } = await supabase
@@ -120,11 +129,11 @@ export async function executarWorker() {
     }
 
     if (!videos || videos.length === 0) {
-      INFO('Nenhum vídeo pendente');
+      if (!silencioso) INFO('Nenhum vídeo pendente');
       return { processados: 0, erros: 0 };
     }
 
-    INFO(`Encontrados ${videos.length} vídeos para processar`);
+    if (!silencioso) INFO(`Encontrados ${videos.length} vídeos para processar`);
 
     // 2. Processar cada vídeo
     for (const video of videos) {
@@ -202,21 +211,6 @@ export async function executarWorker() {
 }
 
 // ============================================================
-// SCHEDULE — Agendar execução
+// SCHEDULE — Modo on-demand (sem cron fixo)
+// O index.js roda em loop contínuo, checando a cada 60s
 // ============================================================
-
-export function iniciarSchedule() {
-  // 00:00 — Resumir vídeos do dia
-  cron.schedule('0 0 * * *', () => {
-    INFO('Cron: executando worker (meia-noite)');
-    executarWorker();
-  });
-
-  // 12:00 — Resumir vídeos da manhã
-  cron.schedule('0 12 * * *', () => {
-    INFO('Cron: executando worker (meio-dia)');
-    executarWorker();
-  });
-
-  INFO('Schedule iniciado: 00:00 e 12:00');
-}

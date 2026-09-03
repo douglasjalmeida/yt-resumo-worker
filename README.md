@@ -1,11 +1,13 @@
 # yt-resumo-worker
 
-Worker que resume vídeos do YouTube automaticamente via cron (2x/dia: 00:00 e 12:00).
+Worker que resume vídeos do YouTube automaticamente (**on-demand**).
+
+A cada 60 segundos, checa o Supabase. Se tiver vídeo com `status='transcrito'` e `resumo_md IS NULL`, gera o resumo imediatamente com Opus 5 (KPA Labs) e notifica no WhatsApp via douglas-ia.
 
 ## Setup
 
 ```bash
-# 1. Clonar/instalar
+# 1. Instalar
 cd yt-resumo-worker
 npm install
 
@@ -13,8 +15,8 @@ npm install
 cp .env.example .env
 # Editar .env com suas credenciais
 
-# 3. Testar localmente
-npm run worker
+# 3. Rodar
+npm start
 ```
 
 ## Variáveis de Ambiente
