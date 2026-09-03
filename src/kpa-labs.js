@@ -33,7 +33,8 @@ export function criarClienteKPA() {
           `${baseUrl}/v1/messages`,
           {
             model: modelo,
-            max_tokens: 4096,
+            max_tokens: 8192,  // Aumentado para acomodar resumos longos
+            thinking: { type: "disabled" },  // Desabilita thinking mode
             messages: [
               {
                 role: 'user',
@@ -55,15 +56,27 @@ export function criarClienteKPA() {
         let texto = null;
 
         if (data.content && Array.isArray(data.content) && data.content.length > 0) {
-          // Formato padrão Anthropic: content[].text
-          const firstContent = data.content[0];
-          if (typeof firstContent === 'string') {
-            texto = firstContent;
-          } else if (firstContent.text) {
-            texto = firstContent.text;
+          // Procura o bloco com 'text' (ignora 'thinking' blocks)
+          for (const block of data.content) {
+            if (block.type === 'text' && block.text) {
+              texto = block.text;
+              break;
+            }
+          }
+          // Fallback: se não achar 'type=text', pega o primeiro com .text
+          if (!texto) {
+            for (const block of data.content) {
+              if (block.text) {
+                texto = block.text;
+                break;
+              }
+            }
+          }
+          // Fallback: string
+          if (!texto && typeof data.content[0] === 'string') {
+            texto = data.content[0];
           }
         } else if (data.completion) {
-          // Formato alternativo
           texto = data.completion;
         } else if (data.text) {
           texto = data.text;
