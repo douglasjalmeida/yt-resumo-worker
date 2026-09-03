@@ -1,5 +1,8 @@
 /**
- * Cliente KPA Labs (proxy Claude)
+ * Cliente KPA Labs (proxy Claude via Anthropic API)
+ *
+ * Usa o mesmo padrão do douglas-ia: ANTHROPIC_BASE_URL + ANTHROPIC_API_KEY
+ * O KPA Labs é um proxy da Anthropic API — só precisa trocar a base URL.
  *
  * Modelo por categoria:
  * - teologia → opus (mais profundidade)
@@ -21,11 +24,11 @@ const MAX_RETRIES = 3;
 const BASE_DELAY_MS = 1000;
 
 export function criarClienteKPA() {
-  const apiKey = process.env.KPA_LABS_API_KEY;
-  const baseUrl = process.env.KPA_LABS_URL || 'https://api.kpalabs.com';
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const baseUrl = process.env.ANTHROPIC_BASE_URL || 'https://api.kpalabz.com';
 
   if (!apiKey) {
-    throw new Error('KPA_LABS_API_KEY é obrigatório');
+    throw new Error('ANTHROPIC_API_KEY é obrigatório');
   }
 
   async function chamarKPA(prompt, modelo) {

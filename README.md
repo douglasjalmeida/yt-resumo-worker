@@ -23,8 +23,8 @@ npm run worker
 |----------|-----------|
 | `SUPABASE_URL` | URL do projeto Supabase |
 | `SUPABASE_PAT` | Personal Access Token do Supabase (ou use `SUPABASE_SERVICE_ROLE_KEY` do douglas-ia) |
-| `KPA_LABS_API_KEY` | API Key do KPA Labs |
-| `KPA_LABS_URL` | URL da API KPA Labs (opcional) |
+| `ANTHROPIC_BASE_URL` | URL do proxy Claude (KPA Labs) — ex: `https://api.kpalabz.com` |
+| `ANTHROPIC_API_KEY` | API Key do KPA Labs |
 | `DOUGLAS_IA_WEBHOOK_URL` | URL do webhook de notificação (douglas-ia) |
 
 ## Deploy na VPS (EasyPanel)
