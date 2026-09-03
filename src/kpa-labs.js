@@ -33,7 +33,7 @@ export function criarClienteKPA() {
           `${baseUrl}/v1/messages`,
           {
             model: modelo,
-            max_tokens: 2048,
+            max_tokens: 4096,
             messages: [
               {
                 role: 'user',
@@ -50,7 +50,32 @@ export function criarClienteKPA() {
           }
         );
 
-        return response.data.content[0].text;
+        // Tenta extrair texto da resposta (suporta múltiplos formatos)
+        const data = response.data;
+        let texto = null;
+
+        if (data.content && Array.isArray(data.content) && data.content.length > 0) {
+          // Formato padrão Anthropic: content[].text
+          const firstContent = data.content[0];
+          if (typeof firstContent === 'string') {
+            texto = firstContent;
+          } else if (firstContent.text) {
+            texto = firstContent.text;
+          }
+        } else if (data.completion) {
+          // Formato alternativo
+          texto = data.completion;
+        } else if (data.text) {
+          texto = data.text;
+        } else if (typeof data === 'string') {
+          texto = data;
+        }
+
+        if (!texto) {
+          throw new Error(`Resposta da KPA Labs sem texto. Status: ${response.status}, Data: ${JSON.stringify(data).substring(0, 500)}`);
+        }
+
+        return texto;
       } catch (err) {
         const isRetryable =
           err.response?.status === 429 ||
