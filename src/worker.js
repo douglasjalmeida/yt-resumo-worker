@@ -108,7 +108,7 @@ export async function executarWorker() {
     // 1. Buscar vídeos pendentes
     const { data: videos, error: erroBusca } = await supabase
       .from('douglas_conteudo_videos')
-      .select('video_id, titulo, categoria, transcricao')
+      .select('video_id, titulo, categoria, transcricao_texto')
       .eq('status', 'transcrito')
       .is('resumo', null)
       .order('data_adicao_playlist', { ascending: true })
@@ -136,7 +136,7 @@ export async function executarWorker() {
         let promptTemplate = PROMPTS_POR_CATEGORIA[categoria] || PROMPTS_POR_CATEGORIA.default;
 
         // Substituir placeholder
-        promptTemplate = promptTemplate.replace('{transcricao}', video.transcricao);
+        promptTemplate = promptTemplate.replace('{transcricao}', video.transcricao_texto);
 
         // Gerar resumo
         const { texto: resumo, modelo } = await kpa.gerarResumo({
