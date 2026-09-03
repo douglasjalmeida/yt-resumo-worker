@@ -108,7 +108,7 @@ export async function executarWorker() {
     // 1. Buscar vídeos pendentes
     const { data: videos, error: erroBusca } = await supabase
       .from('douglas_conteudo_videos')
-      .select('video_id, titulo, categoria, transcricao_texto')
+      .select('video_id, titulo, categoria, transcricao_texto, transcricao_segmentos')
       .eq('status', 'transcrito')
       .is('resumo_md', null)
       .order('data_adicao_playlist', { ascending: true })
@@ -147,13 +147,20 @@ export async function executarWorker() {
         INFO(`Resumo gerado (${modelo})`);
 
         // Salvar no banco
+        const updateData = {
+          resumo_md: resumo,
+          status: 'concluido',
+          updated_at: new Date().toISOString(),
+        };
+
+        // Se categoria não existe, marca como 'Marketing/Conteúdo' (default)
+        if (!video.categoria) {
+          updateData.categoria = 'Marketing/Conteúdo';
+        }
+
         const { error: erroUpdate } = await supabase
           .from('douglas_conteudo_videos')
-          .update({
-            resumo_md: resumo,
-            status: 'concluido',
-            updated_at: new Date().toISOString(),
-          })
+          .update(updateData)
           .eq('video_id', video.video_id);
 
         if (erroUpdate) {
