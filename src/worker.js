@@ -132,7 +132,7 @@ export async function executarWorker() {
         INFO(`Processando: ${video.titulo}`);
 
         // Selecionar prompt baseado na categoria
-        const categoria = video.categoria?.toLowerCase() || 'outro';
+        const categoria = (video.categoria || 'Marketing/Conteúdo').toLowerCase().replace(/[áàãâ]/g, 'a');
         let promptTemplate = PROMPTS_POR_CATEGORIA[categoria] || PROMPTS_POR_CATEGORIA.default;
 
         // Substituir placeholder
@@ -147,20 +147,13 @@ export async function executarWorker() {
         INFO(`Resumo gerado (${modelo})`);
 
         // Salvar no banco
-        const updateData = {
-          resumo_md: resumo,
-          status: 'concluido',
-          updated_at: new Date().toISOString(),
-        };
-
-        // Se categoria não existe, marca como 'Marketing/Conteúdo' (default)
-        if (!video.categoria) {
-          updateData.categoria = 'Marketing/Conteúdo';
-        }
-
         const { error: erroUpdate } = await supabase
           .from('douglas_conteudo_videos')
-          .update(updateData)
+          .update({
+            resumo_md: resumo,
+            status: 'concluido',
+            updated_at: new Date().toISOString(),
+          })
           .eq('video_id', video.video_id);
 
         if (erroUpdate) {
