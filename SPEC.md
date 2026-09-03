@@ -32,9 +32,10 @@ Douglas tem um pipeline de YouTube onde:
    - Atualiza campo `resumo` da tabela
    - Marca `status = 'concluido'`
 
-4. **Notifica via Telegram**
+4. **Notifica via WhatsApp (via douglas-ia)**
+   - Webhook no douglas-ia (`/notificar-resumo`)
+   - douglas-ia envia via uazapi pro WhatsApp do Douglas
    - Mensagem com título do vídeo + link
-   - Resumo gerado
 
 ### Schedule
 
@@ -64,6 +65,10 @@ KPA_LABS_API_KEY=sk-kpa-xxx
 TELEGRAM_BOT_TOKEN=xxx
 TELEGRAM_CHAT_ID=xxx
 ```
+
+## Notificação
+
+A notificação é feita via webhook para o douglas-ia (`POST /notificar-resumo`), que envia a mensagem via WhatsApp usando a uazapi já configurada no douglas-ia.
 
 ---
 

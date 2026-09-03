@@ -6,7 +6,7 @@
 import cron from 'node-cron';
 import { criarClienteSupabase } from './supabase.js';
 import { criarClienteKPA } from './kpa-labs.js';
-import { criarClienteTelegram } from './telegram.js';
+import { criarNotificador } from './notificador.js';
 
 // ============================================================
 // LOG
@@ -97,7 +97,7 @@ Transcrição:
 export async function executarWorker() {
   const supabase = criarClienteSupabase();
   const kpa = criarClienteKPA();
-  const telegram = criarClienteTelegram();
+  const telegram = criarNotificador();
 
   let processados = 0;
   let erros = 0;

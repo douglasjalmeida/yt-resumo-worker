@@ -25,8 +25,7 @@ npm run worker
 | `SUPABASE_PAT` | Personal Access Token do Supabase |
 | `KPA_LABS_API_KEY` | API Key do KPA Labs |
 | `KPA_LABS_URL` | URL da API KPA Labs (opcional) |
-| `TELEGRAM_BOT_TOKEN` | Token do bot Telegram |
-| `TELEGRAM_CHAT_ID` | Chat ID para notificações |
+| `DOUGLAS_IA_WEBHOOK_URL` | URL do webhook de notificação (douglas-ia) |
 
 ## Deploy na VPS (EasyPanel)
 
