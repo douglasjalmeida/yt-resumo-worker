@@ -108,10 +108,10 @@ export async function executarWorker() {
     // 1. Buscar vídeos pendentes
     const { data: videos, error: erroBusca } = await supabase
       .from('douglas_conteudo_videos')
-      .select('id, youtube_id, titulo, categoria, transcricao')
+      .select('video_id, titulo, categoria, transcricao')
       .eq('status', 'transcrito')
       .is('resumo', null)
-      .order('created_at', { ascending: true })
+      .order('data_adicao_playlist', { ascending: true })
       .limit(10);
 
     if (erroBusca) {
@@ -154,7 +154,7 @@ export async function executarWorker() {
             status: 'concluido',
             updated_at: new Date().toISOString(),
           })
-          .eq('id', video.id);
+          .eq('video_id', video.video_id);
 
         if (erroUpdate) {
           throw new Error(`Erro ao salvar: ${erroUpdate.message}`);
@@ -167,7 +167,7 @@ export async function executarWorker() {
         await telegram.enviarMensagem({
           titulo: video.titulo,
           resumo: resumoCurto,
-          youtubeId: video.youtube_id,
+          youtubeId: video.video_id,
         });
 
         INFO(`Notificação enviada`);
@@ -184,7 +184,7 @@ export async function executarWorker() {
             erro: err.message,
             updated_at: new Date().toISOString(),
           })
-          .eq('id', video.id);
+          .eq('video_id', video.video_id);
 
         erros++;
       }
