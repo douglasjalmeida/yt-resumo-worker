@@ -22,7 +22,7 @@ npm run worker
 | Variável | Descrição |
 |----------|-----------|
 | `SUPABASE_URL` | URL do projeto Supabase |
-| `SUPABASE_PAT` | Personal Access Token do Supabase |
+| `SUPABASE_PAT` | Personal Access Token do Supabase (ou use `SUPABASE_SERVICE_ROLE_KEY` do douglas-ia) |
 | `KPA_LABS_API_KEY` | API Key do KPA Labs |
 | `KPA_LABS_URL` | URL da API KPA Labs (opcional) |
 | `DOUGLAS_IA_WEBHOOK_URL` | URL do webhook de notificação (douglas-ia) |
