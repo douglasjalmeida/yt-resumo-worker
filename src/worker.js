@@ -117,7 +117,8 @@ export async function executarWorker({ silencioso = false } = {}) {
     // 1. Buscar vídeos pendentes
     const { data: videos, error: erroBusca } = await supabase
       .from('douglas_conteudo_videos')
-      .select('video_id, titulo, categoria, transcricao_texto, transcricao_segmentos')
+      // Só colunas leves: a transcrição (~38 kB/vídeo) é baixada 1 por vez, ao processar.
+      .select('video_id, titulo, categoria')
       .eq('status', 'transcrito')
       .is('resumo_md', null)
       .order('data_adicao_playlist', { ascending: true })
@@ -125,13 +126,15 @@ export async function executarWorker({ silencioso = false } = {}) {
 
     if (erroBusca) {
       ERROR(`Erro ao buscar vídeos: ${erroBusca.message}`);
-      return { processados: 0, erros: 1 };
+      return { processados: 0, erros: 1, pendentes: 0 };
     }
 
     if (!videos || videos.length === 0) {
       if (!silencioso) INFO('Nenhum vídeo pendente');
-      return { processados: 0, erros: 0 };
+      return { processados: 0, erros: 0, pendentes: 0 };
     }
+
+    const pendentes = videos.length;
 
     if (!silencioso) INFO(`Encontrados ${videos.length} vídeos para processar`);
 
@@ -139,6 +142,17 @@ export async function executarWorker({ silencioso = false } = {}) {
     for (const video of videos) {
       try {
         INFO(`Processando: ${video.titulo}`);
+
+        // Baixa a transcrição só deste vídeo
+        const { data: completo, error: erroTrans } = await supabase
+          .from('douglas_conteudo_videos')
+          .select('transcricao_texto')
+          .eq('video_id', video.video_id)
+          .single();
+        if (erroTrans || !completo?.transcricao_texto) {
+          throw new Error(`Transcrição indisponível: ${erroTrans?.message || 'vazia'}`);
+        }
+        video.transcricao_texto = completo.transcricao_texto;
 
         // Selecionar prompt baseado na categoria
         const categoria = (video.categoria || 'Marketing/Conteúdo').toLowerCase().replace(/[áàãâ]/g, 'a');
@@ -203,10 +217,10 @@ export async function executarWorker({ silencioso = false } = {}) {
     }
 
     INFO(`Worker finalizado: ${processados} processados, ${erros} erros`);
-    return { processados, erros };
+    return { processados, erros, pendentes };
   } catch (err) {
     ERROR(`Erro fatal no worker: ${err.message}`);
-    return { processados, erros: erros + 1 };
+    return { processados, erros: erros + 1, pendentes: 0 };
   }
 }
 
