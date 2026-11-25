@@ -203,14 +203,17 @@ export async function executarWorker({ silencioso = false } = {}) {
         ERROR(`Erro ao processar ${video.titulo}: ${err.message}`);
 
         // Marcar como erro no banco
-        await supabase
+        // A coluna é `erro_motivo` (constraint exige motivo quando status='erro').
+        // Antes gravava em `erro` (inexistente) → 400 → vídeo ficava preso na fila.
+        const { error: erroMarcar } = await supabase
           .from('douglas_conteudo_videos')
           .update({
             status: 'erro',
-            erro: err.message,
+            erro_motivo: String(err.message).slice(0, 500),
             updated_at: new Date().toISOString(),
           })
           .eq('video_id', video.video_id);
+        if (erroMarcar) ERROR(`Falha ao marcar erro em ${video.video_id}: ${erroMarcar.message}`);
 
         erros++;
       }
